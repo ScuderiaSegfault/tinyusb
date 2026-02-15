@@ -147,22 +147,26 @@ TU_ATTR_ALWAYS_INLINE static inline uint32_t round_up_to_cache_line_size(uint32_
   return size;
 }
 
+TU_ATTR_ALWAYS_INLINE static inline void* align_to_cache_line(void* address) {
+  return (void*)((size_t)address & ~(CONFIG_CACHE_L1_CACHE_LINE_SIZE-1));
+}
+
 TU_ATTR_ALWAYS_INLINE static inline bool dwc2_dcache_clean(const void* addr, uint32_t data_size) {
   const int flag = ESP_CACHE_MSYNC_FLAG_TYPE_DATA | ESP_CACHE_MSYNC_FLAG_DIR_C2M;
   data_size = round_up_to_cache_line_size(data_size);
-  return ESP_OK == esp_cache_msync((void*)addr, data_size, flag);
+  return ESP_OK == esp_cache_msync(align_to_cache_line((void*)addr), data_size, flag);
 }
 
 TU_ATTR_ALWAYS_INLINE static inline bool dwc2_dcache_invalidate(const void* addr, uint32_t data_size) {
   const int flag = ESP_CACHE_MSYNC_FLAG_TYPE_DATA | ESP_CACHE_MSYNC_FLAG_DIR_M2C;
   data_size = round_up_to_cache_line_size(data_size);
-  return ESP_OK == esp_cache_msync((void*)addr, data_size, flag);
+  return ESP_OK == esp_cache_msync(align_to_cache_line((void*)addr), data_size, flag);
 }
 
 TU_ATTR_ALWAYS_INLINE static inline bool dwc2_dcache_clean_invalidate(const void* addr, uint32_t data_size) {
   const int flag = ESP_CACHE_MSYNC_FLAG_TYPE_DATA | ESP_CACHE_MSYNC_FLAG_DIR_C2M | ESP_CACHE_MSYNC_FLAG_DIR_M2C;
   data_size = round_up_to_cache_line_size(data_size);
-  return ESP_OK == esp_cache_msync((void*)addr, data_size, flag);
+  return ESP_OK == esp_cache_msync(align_to_cache_line((void*)addr), data_size, flag);
 }
 
 #endif
